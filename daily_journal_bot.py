@@ -14,8 +14,8 @@ from telegram.ext import (
 )
 from apscheduler.schedulers.background import BackgroundScheduler
 
-BOT_TOKEN = "8184049005:AAH8_1iIfLcp6htOTV-rxdQwzek3GSVwXPM"
-WEBHOOK_URL = "https://daily-journal-bot.onrender.com/webhook"
+BOT_TOKEN = os.getenv("BOT_TOKEN") or "8184049005:AAH8_1iIfLcp6htOTV-rxdQwzek3GSVwXPM"
+WEBHOOK_URL = os.getenv("WEBHOOK_URL") or "https://daily-journal-bot.onrender.com/webhook"
 DB_PATH = "journal_data.db"
 
 flask_app = Flask(__name__)
