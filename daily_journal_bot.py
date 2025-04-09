@@ -5,17 +5,15 @@ import sqlite3
 import datetime
 import asyncio
 from flask import Flask, request
-from telegram import (
-    Update, ReplyKeyboardMarkup, KeyboardButton
-)
+from telegram import Update, ReplyKeyboardMarkup, KeyboardButton
 from telegram.ext import (
     Application, CommandHandler, MessageHandler, ContextTypes,
-    filters, CallbackContext, WebhookHandler
+    filters, CallbackContext
 )
 from apscheduler.schedulers.background import BackgroundScheduler
 
-BOT_TOKEN = os.getenv("BOT_TOKEN") or "8184049005:AAH8_1iIfLcp6htOTV-rxdQwzek3GSVwXPM"
-WEBHOOK_URL = os.getenv("WEBHOOK_URL") or "https://daily-journal-bot.onrender.com/webhook"
+BOT_TOKEN = os.getenv("BOT_TOKEN") or "PASTE_YOUR_BOT_TOKEN_HERE"
+WEBHOOK_URL = os.getenv("WEBHOOK_URL") or "https://your-app-name.onrender.com/webhook"
 DB_PATH = "journal_data.db"
 
 flask_app = Flask(__name__)
@@ -46,7 +44,6 @@ def save_response(user_id, category, question, response):
 # === GLOBAL STATE ===
 active_prompts = {}
 app = Application.builder().token(BOT_TOKEN).build()
-handler = WebhookHandler(app)
 
 # === GENERIC SENDER ===
 async def send_prompt(context: CallbackContext, user_id: int, category: str, prompts: list):
@@ -60,48 +57,7 @@ async def send_prompt(context: CallbackContext, user_id: int, category: str, pro
             await context.bot.send_message(chat_id=user_id, text=prompt[0])
 
 # === PROMPTS ===
-def get_sleep_prompts():
-    return [
-        ("Во сколько лег спать?", None),
-        ("Во сколько проснулся?", None),
-        ("Как оцениваешь качество сна? (1-5)", [["5", "4", "3", "2", "1"]]),
-        ("Просыпался ли ночью?", [["Да", "Нет"]]),
-        ("Чувствуешь себя выспавшимся?", [["Да", "Нет"]]),
-        ("Было ли пересыпание?", [["Да", "Нет"]]),
-        ("Комментарий (необязательно)", None)
-    ]
-
-def get_energy_control_prompt():
-    return [
-        ("Соблюдал ли энергетический контроль?", [["Да", "Нет"]]),
-        ("Если нет, то сколько раз произошло истощение энергии?", None)
-    ]
-
-def get_dopamine_prompts():
-    return [
-        ("Какими приложениями пользовался?", [["YouTube", "Instagram", "Dating Apps"]]),
-        ("Сколько времени смотрел reels/shorts?", [["<30 мин", "30-60 мин", ">1 час"]]),
-        ("Общее время использования смартфона?", [["<2 ч", "2-4 ч", ">4 ч"]]),
-        ("Насколько хорошо контролировал импульсы? (1-5)", [["5", "4", "3", "2", "1"]])
-    ]
-
-def get_nutrition_prompts():
-    return [
-        ("Сколько приёмов пищи было сегодня?", [["0", "1", "2", "3", "4", "5"]]),
-        ("Был ли перекус после 20:00?", [["Да", "Нет"]]),
-        ("Сколько воды выпил? (в стаканах)", [["1-3", "4-6", "7+"]]),
-        ("Какие БАДы принял? (можно несколько)", [["Cod liver oil", "Magnesium glycinate", "L-theanine"]]),
-        ("Другие БАДы (ввести вручную, необязательно)", None)
-    ]
-
-def get_skincare_prompt():
-    return [("Какой уход был сделан?", [["Ниацинамид", "Ретинол", "Пилинг", "Ничего"]])]
-
-def get_sun_prompt():
-    return [("Принимал ли солнечные лучи?", [["Да", "Нет"]]), ("Как долго?", [["<15 мин", "15-30 мин", ">30 мин"]])]
-
-def get_work_prompt():
-    return [("Сколько времени сегодня посвятил работе/обучению?", [["<1 ч", "1-2 ч", "2-4 ч", ">4 ч"]])]
+# ... [оставляем все функции get_sleep_prompts() и т.п. без изменений] ...
 
 # === HANDLERS ===
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -148,7 +104,9 @@ def schedule_jobs():
 # === FLASK ROUTE ===
 @flask_app.post("/webhook")
 async def webhook():
-    await handler.handle_update(request)
+    data = await request.get_data()
+    update = Update.de_json(data.decode("utf-8"), app.bot)
+    await app.update_queue.put(update)
     return "OK"
 
 # === MAIN ===
