@@ -121,7 +121,7 @@ def schedule_jobs(app: Application):
             await send_prompt(app.bot, user_id, category, prompts)
         return job
 
-    user_ids = [123456789]  # замените на свой ID или список ID пользователей
+    user_ids = [148797692]  # замените на свой ID или список ID пользователей
 
     for uid in user_ids:
         scheduler.add_job(wrap_send(uid, get_sleep_prompts(), "Сон"), 'cron', hour=10, minute=30)
