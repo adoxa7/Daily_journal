@@ -12,8 +12,9 @@ from telegram.ext import (
 )
 from apscheduler.schedulers.background import BackgroundScheduler
 
-BOT_TOKEN = os.getenv("BOT_TOKEN") or "PASTE_YOUR_BOT_TOKEN_HERE"
-WEBHOOK_URL = os.getenv("WEBHOOK_URL") or "https://your-app-name.onrender.com/webhook"
+BOT_TOKEN = "8184049005:AAH8_1iIfLcp6htOTV-rxdQwzek3GSVwXPM
+"
+WEBHOOK_URL = "https://daily-journal-bot.onrender.com/webhook"
 DB_PATH = "journal_data.db"
 
 flask_app = Flask(__name__)
@@ -125,6 +126,10 @@ def schedule_jobs():
             await send_prompt(CallbackContext.from_update(None, app), user_id, category, prompts)
         return job
 
+    async def test_ping():
+        for uid in [148797692]:
+            await app.bot.send_message(chat_id=uid, text="🔁 Тест: бот работает")
+
     user_ids = [148797692]  # Заменить на актуальные user_id
 
     for uid in user_ids:
@@ -140,6 +145,7 @@ def schedule_jobs():
         scheduler.add_job(lambda: app.bot.send_message(uid, "☀️ Пора выйти на солнечный свет!"), 'cron', hour=12)
         scheduler.add_job(lambda: app.bot.send_message(uid, "🎯 Планируется 4-часовая работа или обучение."), 'cron', hour=13)
 
+    scheduler.add_job(lambda: asyncio.create_task(test_ping()), 'interval', minutes=2)
     scheduler.start()
 
 # === FLASK ROUTE ===
