@@ -148,6 +148,9 @@ def schedule_jobs():
     scheduler.start()
 
 # === FLASK ROUTE ===
+@flask_app.get("/")
+def index():
+    return "Bot is running!"
 @flask_app.post("/webhook")
 async def webhook():
     data = await request.get_data()
@@ -163,6 +166,8 @@ async def run():
     await app.initialize()
     await app.start()
     await app.bot.set_webhook(WEBHOOK_URL)
+    info = await app.bot.get_webhook_info()
+    print("[Webhook Info]", info)
     schedule_jobs()
     print("Webhook bot is running...")
     await asyncio.Event().wait()
