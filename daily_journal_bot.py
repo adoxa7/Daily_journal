@@ -160,17 +160,30 @@ async def webhook():
 
 # === MAIN ===
 async def run():
+    print("run is rinnning")
+
     init_db()
     app.add_handler(CommandHandler("start", start))
     app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_message))
     await app.initialize()
     await app.start()
     await app.bot.set_webhook(WEBHOOK_URL)
+    
+    print("to be awaited")
+
     info = await app.bot.get_webhook_info()
     print("[Webhook Info]", info)
     schedule_jobs()
     print("Webhook bot is running...")
-    await asyncio.Event().wait()
+        # Здесь нужно обеспечить, чтобы бот продолжал работать
+    try:
+        # Бесконечный цикл, чтобы бот не останавливался
+        while True:
+            await asyncio.sleep(60)  # Просто ждем, чтобы не нагружать процессор
+    except (KeyboardInterrupt, SystemExit):
+        # Корректное завершение работы бота
+        await app.stop()
+        await app.updater.stop()
 
 if __name__ == '__main__':
     asyncio.run(run())
